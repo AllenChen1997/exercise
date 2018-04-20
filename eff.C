@@ -1,4 +1,5 @@
 // example code to run Bulk Graviton->ZZ->ZlepZhad selections on electron-channel
+// Try to get efficientcy of nPass3 by TH1F::Divide
 
 #include <vector>
 #include <iostream>
@@ -25,7 +26,8 @@ void xAna_hh(std::string inputFile){
 
   TH1F* h_SD=new TH1F("h_SD","",100,0,200);
 	TH1F* h_nVtx =new TH1F("h_nVtx","",14,0,70);   //new add for total
-	TH1F* h_nPass3 =new TH1F("h_nPass3","",14,0,70); //add for show the nPass4
+	TH1F* h_nPass3 = (TH1F*)h_nVtx->Clone("h_nPass3"); //add the same scale (h_nVtx) hist "nPass3"
+	TH1F* h_eff = (TH1F*)h_nVtx->Clone("h_eff"); //new hist. for (h_nPass3/h_nVtx)
   //Event loop
   for(Long64_t jEntry=0; jEntry<data.GetEntriesFast() ;jEntry++){
 
@@ -91,8 +93,8 @@ void xAna_hh(std::string inputFile){
     }  
 
   } // end of loop over entries
-//get efficeincy
-	Double_t mi = h_nVtx->GetXaxis()->GetXmin();
+//get efficeincy(old)
+	/*Double_t mi = h_nVtx->GetXaxis()->GetXmin();
   	Double_t ma = h_nVtx->GetXaxis()->GetXmax();
 	Int_t nSteps = h_nVtx->GetXaxis()->GetNbins();
 	Double_t nVtxValue[nSteps];
@@ -102,11 +104,14 @@ void xAna_hh(std::string inputFile){
 	{
 		nVtxValue[j] = j*step + 0.5*step;
 		if(h_nVtx->GetBinContent(j) != 0)		
-		eff[j] = h_nPass3->GetBinContent(j)/h_nVtx->GetBinContent(j)*1.0;
+		eff[j] = (float)h_nPass3->GetBinContent(j)/(float)h_nVtx->GetBinContent(j);
 //fprintf(stderr, "eff is %f\n", eff[j]);
 	}
 
-	TGraph *gr  = new TGraph(nSteps,nVtxValue,eff);
+	TGraph *gr  = new TGraph(nSteps,nVtxValue,eff);*/
+//get efficiency (new)
+	h_eff->Divide(h_nPass3, h_nVtx, 1, 1, ""); //it means h_eff = c1*h_nPass3/c2*h_nVtx, here I set c1=c2=1.
+
 //show the result
   std::cout << "nTotal    = " << nTotal << std::endl;
   for(int i=0;i<20;i++)
@@ -115,6 +120,7 @@ void xAna_hh(std::string inputFile){
 
    h_nVtx->Draw();
 	h_nPass3->Draw();
-	gr->Draw("AC*");   
+	h_eff->Draw("E");		//draw hist. with error bar
+	//gr->Draw("AC*");   //(old)
 }
 
