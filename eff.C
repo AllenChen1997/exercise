@@ -93,6 +93,7 @@ void xAna_hh(std::string inputFile){
     }  
 
   } // end of loop over entries
+
 //get efficeincy(old)
 	/*Double_t mi = h_nVtx->GetXaxis()->GetXmin();
   	Double_t ma = h_nVtx->GetXaxis()->GetXmax();
@@ -109,8 +110,11 @@ void xAna_hh(std::string inputFile){
 	}
 
 	TGraph *gr  = new TGraph(nSteps,nVtxValue,eff);*/
+
 //get efficiency (new)
-	h_eff->Divide(h_nPass3, h_nVtx, 1, 1, ""); //it means h_eff = c1*h_nPass3/c2*h_nVtx, here I set c1=c2=1.
+	h_nVtx->Sumw2();//creat structure to store sum of squares of weights
+	h_nPass3->Sumw2();
+	h_eff->Divide(h_nPass3, h_nVtx, 1, 1, "B"); //it means h_eff = c1*h_nPass3/c2*h_nVtx, here I set c1=c2=1.
 
 //show the result
   std::cout << "nTotal    = " << nTotal << std::endl;
@@ -118,8 +122,8 @@ void xAna_hh(std::string inputFile){
     if(nPass[i]>0)
       std::cout << "nPass[" << i << "]= " << nPass[i] << std::endl;
 
-   h_nVtx->Draw();
-	h_nPass3->Draw();
+   //h_nVtx->Draw();
+	//h_nPass3->Draw();
 	h_eff->Draw("E");		//draw hist. with error bar
 	//gr->Draw("AC*");   //(old)
 }
